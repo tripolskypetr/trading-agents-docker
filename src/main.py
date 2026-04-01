@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
@@ -5,6 +6,7 @@ from pydantic import BaseModel
 from typing import Literal, Optional
 import os
 import uvicorn
+
 
 from tradingagents.graph.trading_graph import TradingAgentsGraph
 from tradingagents.default_config import DEFAULT_CONFIG
@@ -20,20 +22,9 @@ from tools.fundamentals import (
     get_insider_transactions,
 )
 
-app = FastAPI(title="TradingAgents API", version="1.0.0")
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 graph: Optional[TradingAgentsGraph] = None
 
 
-@app.on_event("startup")
 async def startup():
     global graph
     config = DEFAULT_CONFIG.copy()
@@ -63,6 +54,23 @@ async def startup():
 
     stats_handler = StatsCallbackHandler()
     graph = TradingAgentsGraph(debug=True, config=config, callbacks=[stats_handler])
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    await startup()
+    yield
+
+
+app = FastAPI(title="TradingAgents API", version="1.0.0", lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 # --- Request models ---
