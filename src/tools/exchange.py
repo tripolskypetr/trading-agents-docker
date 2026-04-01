@@ -110,9 +110,15 @@ def get_binance_indicators(symbol: str, indicator: str, curr_date: str, look_bac
 
     df = df.reset_index().rename(columns={"Date": "date", "Open": "open", "High": "high", "Low": "low", "Close": "close", "Volume": "volume"})
     df["date"] = pd.to_datetime(df["date"])
+    df = df.set_index("date")
 
     wrapped = wrap(df)
     wrapped[indicator]  # trigger stockstats calculation
+
+    # build date -> value lookup from index
+    indicator_data = {}
+    for ts, val in wrapped[indicator].items():
+        indicator_data[ts.strftime("%Y-%m-%d")] = val
 
     before_dt = curr_dt - timedelta(days=look_back_days)
 
@@ -120,11 +126,9 @@ def get_binance_indicators(symbol: str, indicator: str, curr_date: str, look_bac
     current = curr_dt
     while current >= before_dt:
         date_str = current.strftime("%Y-%m-%d")
-        date_ts = pd.Timestamp(date_str)
-        row = wrapped[wrapped["date"] == date_ts]
-        if not row.empty:
-            val = row.iloc[0][indicator]
-            ind_string += f"{date_str}: {val if pd.notna(val) else 'N/A'}\n"
+        val = indicator_data.get(date_str)
+        if val is not None and pd.notna(val):
+            ind_string += f"{date_str}: {val}\n"
         else:
             ind_string += f"{date_str}: N/A\n"
         current -= timedelta(days=1)
