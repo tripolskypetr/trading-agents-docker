@@ -4,7 +4,8 @@
 .venv
 
 # Git Submodule
-src/agent
+src/agent/*
+!src/agent/.gitkeep
 temp
 
 # Byte-compiled / optimized / DLL files
