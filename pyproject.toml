@@ -6,6 +6,7 @@ dependencies = [
     "tradingagents",
     "fastapi>=0.115.0",
     "uvicorn[standard]>=0.34.0",
+    "ccxt>=4.0.0",
 ]
 
 [tool.uv.sources]

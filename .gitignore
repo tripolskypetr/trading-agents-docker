@@ -3,6 +3,9 @@
 .vscode
 .venv
 
+# Runtime
+eval_results
+
 # Git Submodule
 src/agent/*
 !src/agent/.gitkeep

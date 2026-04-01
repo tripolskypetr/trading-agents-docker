@@ -8,7 +8,17 @@ import uvicorn
 
 from tradingagents.graph.trading_graph import TradingAgentsGraph
 from tradingagents.default_config import DEFAULT_CONFIG
+from tradingagents.dataflows.interface import VENDOR_METHODS
+from tradingagents.dataflows.y_finance import get_YFin_data_online
 from cli.stats_handler import StatsCallbackHandler
+from tools.exchange import get_binance_ohlcv, get_binance_indicators
+from tools.fundamentals import (
+    get_fundamentals,
+    get_balance_sheet,
+    get_cashflow,
+    get_income_statement,
+    get_insider_transactions,
+)
 
 app = FastAPI(title="TradingAgents API", version="1.0.0")
 
@@ -27,12 +37,30 @@ graph: Optional[TradingAgentsGraph] = None
 async def startup():
     global graph
     config = DEFAULT_CONFIG.copy()
+
     if os.getenv("LLM_PROVIDER"):
         config["llm_provider"] = os.getenv("LLM_PROVIDER")
     if os.getenv("DEEP_THINK_LLM"):
         config["deep_think_llm"] = os.getenv("DEEP_THINK_LLM")
     if os.getenv("QUICK_THINK_LLM"):
         config["quick_think_llm"] = os.getenv("QUICK_THINK_LLM")
+
+    def use_vendor(vendor: str, method: str, impl):
+        VENDOR_METHODS[method] = {vendor: impl}
+        config["tool_vendors"][method] = vendor
+
+    config["max_debate_rounds"] = 1
+    config["max_risk_discuss_rounds"] = 1
+
+    use_vendor("yfinance", "get_stock_data", get_YFin_data_online)
+    use_vendor("binance", "get_stock_data", get_binance_ohlcv)
+    use_vendor("binance", "get_indicators", get_binance_indicators)
+    use_vendor("binance", "get_fundamentals", get_fundamentals)
+    use_vendor("binance", "get_balance_sheet", get_balance_sheet)
+    use_vendor("binance", "get_cashflow", get_cashflow)
+    use_vendor("binance", "get_income_statement", get_income_statement)
+    use_vendor("binance", "get_insider_transactions", get_insider_transactions)
+
     stats_handler = StatsCallbackHandler()
     graph = TradingAgentsGraph(debug=True, config=config, callbacks=[stats_handler])
 
