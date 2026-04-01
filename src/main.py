@@ -14,6 +14,7 @@ from tradingagents.dataflows.interface import VENDOR_METHODS
 from tradingagents.dataflows.y_finance import get_YFin_data_online
 from cli.stats_handler import StatsCallbackHandler
 from tools.exchange import get_binance_ohlcv, get_binance_indicators
+from tools.news import get_news, get_global_news
 from tools.fundamentals import (
     get_fundamentals,
     get_balance_sheet,
@@ -51,6 +52,8 @@ async def startup():
     use_vendor("binance", "get_cashflow", get_cashflow)
     use_vendor("binance", "get_income_statement", get_income_statement)
     use_vendor("binance", "get_insider_transactions", get_insider_transactions)
+    use_vendor("ddgs", "get_news", get_news)
+    use_vendor("ddgs", "get_global_news", get_global_news)
 
     stats_handler = StatsCallbackHandler()
     graph = TradingAgentsGraph(debug=True, config=config, callbacks=[stats_handler])
