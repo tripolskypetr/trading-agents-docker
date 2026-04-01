@@ -1,0 +1,12 @@
+services:
+  trading-agents:
+    image: tripolskypetr/trading-agents:latest
+    network_mode: host
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
