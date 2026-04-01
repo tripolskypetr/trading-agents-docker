@@ -12,22 +12,37 @@ def get_news(
     except ImportError:
         return "ddgs is not installed. Add ddgs to dependencies."
 
-    query = f"{ticker} cryptocurrency news"
+    month_year = datetime.strptime(end_date, "%Y-%m-%d").strftime("%B %Y")
+    queries = [
+        f"{ticker} news {month_year}",
+        f"{ticker} price {month_year} forecast analytics",
+        f"{ticker} negative news {month_year} price drop regulatory problems",
+        f"{ticker} negative news {month_year} problems regulator crackdown",
+        f"{ticker} security hackers fraud regulation negative news problems",
+    ]
     start_dt = datetime.strptime(start_date, "%Y-%m-%d")
     end_dt = datetime.strptime(end_date, "%Y-%m-%d")
 
+    seen_titles: set = set()
+    all_results = []
     try:
-        results = DDGS().news(query, max_results=20)
+        for query in queries:
+            results = DDGS().news(query, max_results=20)
+            for article in results:
+                title = article.get("title", "")
+                if title not in seen_titles:
+                    seen_titles.add(title)
+                    all_results.append(article)
     except Exception as e:
         return f"Error fetching news for {ticker}: {str(e)}"
 
-    if not results:
+    if not all_results:
         return f"No news found for {ticker} between {start_date} and {end_date}"
 
     news_str = ""
     count = 0
 
-    for article in results:
+    for article in all_results:
         pub_date_str = article.get("date", "")
         if pub_date_str:
             try:
