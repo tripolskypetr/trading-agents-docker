@@ -8,6 +8,7 @@ import uvicorn
 
 from tradingagents.graph.trading_graph import TradingAgentsGraph
 from tradingagents.default_config import DEFAULT_CONFIG
+from cli.stats_handler import StatsCallbackHandler
 
 app = FastAPI(title="TradingAgents API", version="1.0.0")
 
@@ -32,7 +33,8 @@ async def startup():
         config["deep_think_llm"] = os.getenv("DEEP_THINK_LLM")
     if os.getenv("QUICK_THINK_LLM"):
         config["quick_think_llm"] = os.getenv("QUICK_THINK_LLM")
-    graph = TradingAgentsGraph(config=config)
+    stats_handler = StatsCallbackHandler()
+    graph = TradingAgentsGraph(debug=True, config=config, callbacks=[stats_handler])
 
 
 # --- Request models ---
