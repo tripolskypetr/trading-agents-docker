@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/TauricResearch/TradingAgents/raw/main/assets/TauricResearch.png" height="115px" alt="trading-agents-docker" />
+  <img src="https://github.com/tripolskypetr/trading-agents-docker/raw/master/assets/logo.png" height="115px" alt="trading-agents-docker" />
 </p>
 
 <p align="center">
