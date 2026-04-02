@@ -11,7 +11,6 @@ import uvicorn
 from tradingagents.graph.trading_graph import TradingAgentsGraph
 from tradingagents.default_config import DEFAULT_CONFIG
 from tradingagents.dataflows.interface import VENDOR_METHODS
-from tradingagents.dataflows.y_finance import get_YFin_data_online
 from cli.stats_handler import StatsCallbackHandler
 from tools.exchange import get_binance_ohlcv, get_binance_indicators
 from tools.news import get_news, get_global_news
@@ -44,7 +43,6 @@ async def startup():
     config["max_debate_rounds"] = 1
     config["max_risk_discuss_rounds"] = 1
 
-    use_vendor("yfinance", "get_stock_data", get_YFin_data_online)
     use_vendor("binance", "get_stock_data", get_binance_ohlcv)
     use_vendor("binance", "get_indicators", get_binance_indicators)
     use_vendor("binance", "get_fundamentals", get_fundamentals)
@@ -56,7 +54,12 @@ async def startup():
     use_vendor("ddgs", "get_global_news", get_global_news)
 
     stats_handler = StatsCallbackHandler()
-    graph = TradingAgentsGraph(debug=True, config=config, callbacks=[stats_handler])
+    graph = TradingAgentsGraph(
+        selected_analysts=["social", "news"],
+        debug=True,
+        config=config,
+        callbacks=[stats_handler],
+    )
 
 
 @asynccontextmanager
